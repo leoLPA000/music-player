@@ -256,12 +256,12 @@ function renderNeedle() {
 function renderNowPlaying(track) {
   if (!track) {
     dom.trackTitle.textContent  = '...';
-    dom.trackArtist.textContent = 'by —';
+    dom.trackArtist.textContent = 'de —';
     dom.albumMask.style.display = 'none';
     return;
   }
   updateMarquee(track.title);
-  dom.trackArtist.textContent = `by ${track.artist}`;
+  dom.trackArtist.textContent = `de ${track.artist}`;
 
   if (track.art) {
     dom.albumArt.src = track.art;
@@ -361,7 +361,7 @@ function renderPlaylistList() {
   if (!state.tracks.length) {
     const empty = document.createElement('div');
     empty.className = 'settings-label';
-    empty.textContent = 'no hay canciones';
+    empty.textContent = 'sin canciones';
     dom.playlistList.appendChild(empty);
     return;
   }
