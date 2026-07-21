@@ -256,12 +256,12 @@ function renderNeedle() {
 function renderNowPlaying(track) {
   if (!track) {
     dom.trackTitle.textContent  = '...';
-    dom.trackArtist.textContent = 'de —';
+    dom.trackArtist.textContent = '—';
     dom.albumMask.style.display = 'none';
     return;
   }
   updateMarquee(track.title);
-  dom.trackArtist.textContent = `de ${track.artist}`;
+  dom.trackArtist.textContent = track.artist;
 
   if (track.art) {
     dom.albumArt.src = track.art;
