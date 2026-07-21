@@ -656,9 +656,30 @@ function setPlayMode(m) {
 }
 
 /* ──────────────────────────────────────────────────────
+   RESPONSIVE SIZE  (fluid, works on any screen/orientation)
+   Player ratio: 306 wide × 497 tall.
+   --player-vw = max width so height fits inside the viewport.
+────────────────────────────────────────────────────── */
+function updateSize() {
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const BASE_W = 306;
+  const BASE_H = 497;
+  const MARGIN  = 0.94;
+  const zoomByW = (vw * MARGIN) / BASE_W;
+  const zoomByH = (vh * MARGIN) / BASE_H;
+  const zoom = Math.min(zoomByW, zoomByH);
+  document.documentElement.style.setProperty('--player-zoom', zoom.toFixed(4));
+}
+/* Expose for testing / external triggers */
+window.__cupidResize = updateSize;
+
+/* ──────────────────────────────────────────────────────
    INIT
 ────────────────────────────────────────────────────── */
 document.addEventListener('DOMContentLoaded', () => {
+  /* Size the player before anything renders */
+  updateSize();
   /* Cache DOM references */
   dom = {
     imgFrame:          $('img-frame'),
@@ -733,4 +754,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
   /* Fetch songs from Supabase */
   loadSongs();
+
+  /* Resize / orientation — recalculate player size */
+  window.addEventListener('resize', updateSize);
+  window.addEventListener('orientationchange', () => {
+    /* Small delay so the browser has committed the new dimensions */
+    setTimeout(updateSize, 150);
+  });
+
+  /* iOS Safari: address bar appears/disappears — visualViewport handles it */
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', updateSize);
+  }
 });

@@ -16,33 +16,35 @@ html, body {
   align-items: center;
   justify-content: center;
   overflow: hidden;
+  /* Prevent iOS bounce / overscroll */
+  overscroll-behavior: none;
+  /* Prevent text selection on long-press (mobile) */
+  -webkit-user-select: none;
+  user-select: none;
+  /* Remove tap highlight on mobile */
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* ───────────────────────────────────────────────────────
    PLAYER
-   --vw replaces 100vw from the original Electron build.
-   All formulas stay identical: calc(X / 306 * var(--vw))
+   Base size is fixed at 306×497 (the original visible frame).
+   --vw stays 306px — all original calc() formulas work unchanged.
+   Responsive scaling uses CSS `zoom` set from JS (updateSize).
+   zoom scales the full element + child hit targets + layout size.
 ─────────────────────────────────────────────────────── */
 .player {
   --vw: 306px;
+  zoom: var(--player-zoom, 1);
   position: relative;
-  width: var(--vw);
-  height: calc(497 / 306 * var(--vw));
+  width:  var(--vw);
+  height: calc(497 / 306 * var(--vw));  /* 497px */
   overflow: hidden;
   border-radius: calc(5 / 306 * var(--vw));
   clip-path: inset(0 0 0 calc(3 / 306 * var(--vw)));
   flex-shrink: 0;
+  image-rendering: pixelated;
+  transition: zoom 0.15s ease;
 }
-
-/* Responsive: scale based on available height (height is the constraint) */
-/* Player ratio = 306 wide : 497 tall. Solve for --vw given viewport height:
-   --vw = viewport_height * 306/497 * safety_factor               */
-@media (min-height: 560px)  { .player { --vw: 320px; } }
-@media (min-height: 620px)  { .player { --vw: 360px; } }
-@media (min-height: 680px)  { .player { --vw: 400px; } }
-@media (min-height: 780px)  { .player { --vw: 460px; } }
-@media (min-height: 900px)  { .player { --vw: 530px; } }
-@media (min-height: 1050px) { .player { --vw: 620px; } }
 
 /* ── Layers ── */
 .layer {
@@ -246,9 +248,12 @@ html, body {
   left:   calc(30  / 306 * var(--vw));
   top:    calc(446 / 306 * var(--vw));
   width:  calc(241 / 306 * var(--vw));
-  height: calc(6   / 306 * var(--vw));
+  /* Tall hit target for easy finger tapping */
+  height: calc(20  / 306 * var(--vw));
+  margin-top: calc(-7 / 306 * var(--vw));
   z-index: 150;
   cursor: pointer;
+  touch-action: none;
 }
 
 /* ── Volume hover zone ── */
@@ -259,6 +264,7 @@ html, body {
   width:  calc(20  / 306 * var(--vw));
   height: calc(18  / 306 * var(--vw));
   z-index: 155;
+  touch-action: none;
 }
 
 .btn-volume-icon {

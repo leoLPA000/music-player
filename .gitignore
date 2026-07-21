@@ -1,24 +1,22 @@
-.claude/
-*.p8
-.env
-node_modules/
-dist/
-dist-electron/
-out/
-.vite/
+# Local audio files (too heavy for git)
+audio/*.mp3
+audio/*.mp4
+audio/*.flac
+audio/*.wav
+audio/*.ogg
+
+# yt-dlp binary (legacy, no longer used)
 bin/
 
+# Electron secrets (legacy)
+*.p8
+
+# OS / editor
 .DS_Store
 Thumbs.db
-
-.env.*.local
-.env.local
-
-audio/*.mp3
-
-*.log
-npm-debug.log*
-
 .vscode/
 .idea/
 *.swp
+
+# Logs
+*.log
