@@ -300,15 +300,21 @@ function updateMarquee(text) {
 function renderProgress(progress, currentTime, duration) {
   const pct = state.hoverProgress ?? progress;
 
-  // progress_bar_stars: clip right side to show fill
-  const starsFill = 131 + pct * 226;
+  // Sparkle fill — bar spans image x=132..371 (measured from the PNG).
+  // inset % are relative to the 526px rendered layer; the 512→526 stretch
+  // cancels when expressed as fractions of 512, so we can use image coords directly.
+  const sparkleX = 132 + pct * 239 + 10; // +10 so star always sits inside the lit region
   dom.imgProgressStars.style.clipPath =
-    `inset(0 ${(1 - (starsFill + 10) / 512) * 100}% 0 0)`;
+    `inset(0 ${Math.max(0, (1 - sparkleX / 512) * 100).toFixed(2)}% 0 0)`;
 
-  // star indicator position
-  const starOffset = pct * (226 / 512) * 171.9; // matches vw math
+  // Star indicator — must use var(--vw) not vw so it scales with the zoom-based layout.
+  // Star graphic center sits at image x=140 → player x≈33.8 with no transform.
+  // Seek bar spans player x=30..271 (from CSS left/width of #seek-bar).
+  const STAR_DEFAULT = 33.8;          // player-px of star centre at translateX=0
+  const starPlayerX  = 30 + pct * 241; // target player-px (30 = bar start, 271 = bar end)
+  const translateFrac = (starPlayerX - STAR_DEFAULT) / 306; // fraction of --vw
   dom.imgStar.style.transform =
-    `translateX(calc(-3 / 306 * var(--vw, 306px) + ${starOffset}vw))`;
+    `translateX(calc(${translateFrac.toFixed(6)} * var(--vw, 306px)))`;
   dom.imgStar.src = state.starHovered
     ? 'assets/star_selected.png'
     : 'assets/star.png';
