@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>cupid player</title>
+  <link rel="stylesheet" href="css/theme.css" />
+  <link rel="stylesheet" href="css/player.css" />
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     PLAYER  (all positions mirror original Electron build)
+═══════════════════════════════════════════════════════ -->
+<div class="player" id="player">
+
+  <!-- ── Base frame ── -->
+  <img id="img-frame" class="layer" src="assets/pink/frame.png" alt="" draggable="false" />
+
+  <!-- ── Window title ── -->
+  <div class="window-title">cupid player</div>
+
+  <!-- ── Record player base ── -->
+  <img id="img-record-player" class="record-player" src="assets/pink/record_player.png" alt="" draggable="false" />
+
+  <!-- ── Spinning record (current) ── -->
+  <img id="img-record" class="record-player" src="assets/animations/record-pink/frame-1.png" alt="" draggable="false" />
+
+  <!-- ── Incoming record during swap ── -->
+  <img id="img-record-in" class="record-player" src="assets/animations/record-blue/frame-1.png" alt="" draggable="false" style="display:none" />
+
+  <!-- ── Needle ── -->
+  <img id="img-needle" class="record-player" src="assets/animations/pink/needle-playing/frame-1.png" alt="" draggable="false" />
+
+  <!-- ── Frame overlay (clips sliding records) ── -->
+  <img id="img-frame-nobg" class="layer frame-overlay" src="assets/pink/frame_no_background.png" alt="" draggable="false" />
+
+  <!-- ── Plant decoration ── -->
+  <img id="img-plant" class="layer layer-ui" src="assets/pink/plant.png" alt="" draggable="false" />
+
+  <!-- ── Progress bar ── -->
+  <img id="img-progress-bar"   class="layer layer-ui" src="assets/pink/progress_bar.png"       alt="" draggable="false" />
+  <img id="img-progress-stars" class="layer layer-ui" src="assets/progress_bar_stars.png"       alt="" draggable="false" />
+  <img id="img-star"           class="layer layer-ui" src="assets/star.png"                     alt="" draggable="false" />
+
+  <!-- ── Playback control layers (visual only) ── -->
+  <img id="img-backwards" class="layer layer-ui" src="assets/pink/backwards_button.png" alt="" draggable="false" />
+  <img id="img-play"      class="layer layer-ui" src="assets/pink/play_button.png"      alt="" draggable="false" />
+  <img id="img-forwards"  class="layer layer-ui" src="assets/pink/forwards_button.png"  alt="" draggable="false" />
+
+  <!-- ── Volume button layer ── -->
+  <img id="img-volume" class="layer layer-ui" src="assets/pink/volume_button.png" alt="" draggable="false" style="opacity:0.8" />
+
+  <!-- ── Volume bar (shown on hover) ── -->
+  <img id="img-volume-bar-low"  class="layer layer-ui volume-bar-layer" src="assets/pink/volume_bar_low.png"  alt="" draggable="false" style="display:none" />
+  <img id="img-volume-bar-high" class="layer layer-ui volume-bar-layer" src="assets/pink/volume_bar_high.png" alt="" draggable="false" style="display:none" />
+
+  <!-- ── Shuffle / repeat layer ── -->
+  <img id="img-play-mode" class="layer layer-ui" src="assets/pink/shuffle_button.png" alt="" draggable="false" style="opacity:0.4" />
+
+  <!-- ── Window control layers ── -->
+  <img id="img-minimizer" class="layer layer-ui" src="assets/pink/minimizer_button.png" alt="" draggable="false" />
+  <img id="img-window"    class="layer layer-ui" src="assets/pink/window_button.png"    alt="" draggable="false" />
+  <img id="img-exit"      class="layer layer-ui" src="assets/pink/exit_button.png"      alt="" draggable="false" />
+
+  <!-- ── Settings icon ── -->
+  <img id="img-settings" class="layer layer-ui settings-layer" src="assets/pink/settings.png" alt="" draggable="false" />
+
+  <!-- ── SVG clip-path for pixel-art album mask ── -->
+  <svg width="0" height="0" style="position:absolute">
+    <defs>
+      <clipPath id="album-mask" clipPathUnits="objectBoundingBox">
+        <rect x="0.07317" y="0"       width="0.85366" height="1"       />
+        <rect x="0.04878" y="0.02439" width="0.90244" height="0.95122" />
+        <rect x="0.02439" y="0.04878" width="0.95122" height="0.90244" />
+        <rect x="0"       y="0.07317" width="1"       height="0.85366" />
+      </clipPath>
+    </defs>
+  </svg>
+
+  <!-- ── Album art ── -->
+  <div id="album-mask" class="album-mask" style="display:none">
+    <img id="album-art" class="album-art" src="" alt="" draggable="false" />
+  </div>
+
+  <!-- ── Album frame overlay ── -->
+  <img id="img-album-frame" class="layer album-frame-layer" src="assets/pink/album_frame.png" alt="" draggable="false" />
+
+  <!-- ── Now playing ── -->
+  <div class="now-playing">
+    <div class="track-info">
+      <div class="now-playing-label">now playing...</div>
+      <div id="track-title"  class="track-title">...</div>
+      <div id="track-artist" class="track-artist">by —</div>
+    </div>
+  </div>
+
+  <!-- ── Time display ── -->
+  <div class="time-display">
+    <span id="time-left">0:00</span>
+    <span id="time-right">0:00</span>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       INVISIBLE CLICK TARGETS
+  ═══════════════════════════════════════════════════ -->
+
+  <!-- Progress seek -->
+  <div id="seek-bar" class="progress-seek"></div>
+
+  <!-- Playback buttons -->
+  <div id="btn-prev"      class="btn btn-prev"></div>
+  <div id="btn-play"      class="btn btn-play"></div>
+  <div id="btn-next"      class="btn btn-next"></div>
+
+  <!-- Shuffle / repeat -->
+  <div id="btn-play-mode" class="btn btn-playmode"></div>
+
+  <!-- Window controls -->
+  <div id="btn-minimize"  class="btn btn-minimize"></div>
+  <div id="btn-window"    class="btn btn-window"></div>
+  <div id="btn-exit"      class="btn btn-exit"></div>
+
+  <!-- Settings toggle -->
+  <div id="btn-settings"  class="btn btn-settings"></div>
+
+  <!-- Volume zone (hover to expand) -->
+  <div id="volume-zone" class="volume-hover-zone">
+    <div id="btn-volume-icon" class="btn-volume-icon"></div>
+    <div id="volume-bar-area" class="volume-bar-area"></div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════
+       SETTINGS PANEL
+  ═══════════════════════════════════════════════════ -->
+  <div id="settings-panel" class="settings-panel" style="display:none">
+    <div class="settings-panel-inner">
+
+      <!-- Theme -->
+      <div class="settings-label">theme</div>
+      <div class="settings-theme-row">
+        <button id="btn-theme-pink" class="settings-theme-btn active">pink</button>
+        <button id="btn-theme-blue" class="settings-theme-btn">blue</button>
+      </div>
+
+      <!-- Play mode -->
+      <div class="settings-label">mode</div>
+      <div class="settings-theme-row">
+        <button id="btn-mode-normal"  class="settings-theme-btn active">normal</button>
+        <button id="btn-mode-shuffle" class="settings-theme-btn">shuffle</button>
+        <button id="btn-mode-repeat"  class="settings-theme-btn">repeat</button>
+      </div>
+
+      <!-- Songs -->
+      <div class="settings-label">songs</div>
+      <input  id="search-input" class="settings-input" type="search" placeholder="search..." autocomplete="off" />
+      <div    id="settings-loading" class="settings-label" style="display:none">loading...</div>
+      <div    id="playlist-list"    class="settings-playlist-list"></div>
+      <button id="btn-reload"       class="settings-theme-btn">reload</button>
+
+      <!-- Error -->
+      <div id="settings-error" class="settings-error" style="display:none"></div>
+
+    </div>
+  </div>
+
+</div><!-- /.player -->
+
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

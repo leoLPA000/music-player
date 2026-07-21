@@ -1,0 +1,397 @@
+/* ── Font ── */
+@font-face {
+  font-family: 'Rainyhearts';
+  src: url('../font/rainyhearts.ttf') format('truetype');
+  font-display: swap;
+}
+
+/* ── Page shell ── */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0;
+  width: 100%; height: 100%;
+  background: #0d0810;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+/* ───────────────────────────────────────────────────────
+   PLAYER
+   --vw replaces 100vw from the original Electron build.
+   All formulas stay identical: calc(X / 306 * var(--vw))
+─────────────────────────────────────────────────────── */
+.player {
+  --vw: 306px;
+  position: relative;
+  width: var(--vw);
+  height: calc(497 / 306 * var(--vw));
+  overflow: hidden;
+  border-radius: calc(5 / 306 * var(--vw));
+  clip-path: inset(0 0 0 calc(3 / 306 * var(--vw)));
+  flex-shrink: 0;
+}
+
+/* Responsive: scale based on available height (height is the constraint) */
+/* Player ratio = 306 wide : 497 tall. Solve for --vw given viewport height:
+   --vw = viewport_height * 306/497 * safety_factor               */
+@media (min-height: 560px)  { .player { --vw: 320px; } }
+@media (min-height: 620px)  { .player { --vw: 360px; } }
+@media (min-height: 680px)  { .player { --vw: 400px; } }
+@media (min-height: 780px)  { .player { --vw: 460px; } }
+@media (min-height: 900px)  { .player { --vw: 530px; } }
+@media (min-height: 1050px) { .player { --vw: 620px; } }
+
+/* ── Layers ── */
+.layer {
+  position: absolute;
+  top:  calc(-23 / 306 * var(--vw));
+  left: calc(-110 / 306 * var(--vw));
+  width:  calc(526 / 306 * var(--vw));
+  height: calc(526 / 306 * var(--vw));
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+}
+
+.layer.clickable {
+  pointer-events: auto;
+  cursor: pointer;
+}
+
+/* ── Window title ── */
+.window-title {
+  position: absolute;
+  left:  calc(24 / 306 * var(--vw));
+  top:   calc(27 / 306 * var(--vw));
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(20 / 306 * var(--vw));
+  color: var(--color-title);
+  z-index: 50;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ── Button base ── */
+.btn {
+  position: absolute;
+  width:  calc(20 / 306 * var(--vw));
+  height: calc(21 / 306 * var(--vw));
+  z-index: 150;
+  cursor: pointer;
+  border-radius: calc(4 / 306 * var(--vw));
+}
+
+/* Window controls */
+.btn-minimize { left: calc(221 / 306 * var(--vw)); top: calc(25 / 306 * var(--vw)); }
+.btn-window   { left: calc(245 / 306 * var(--vw)); top: calc(25 / 306 * var(--vw)); width: calc(19 / 306 * var(--vw)); }
+.btn-exit     { left: calc(268 / 306 * var(--vw)); top: calc(25 / 306 * var(--vw)); }
+
+/* Settings button */
+.settings-layer { transform: scale(0.85); transform-origin: calc(310 / 512 * 100%) calc(57 / 512 * 100%); }
+.btn-settings   { left: calc(195 / 306 * var(--vw)); top: calc(25 / 306 * var(--vw)); }
+
+/* Playback controls */
+.btn-prev { left: calc(62  / 306 * var(--vw)); top: calc(395 / 306 * var(--vw)); width: calc(44 / 306 * var(--vw)); height: calc(31 / 306 * var(--vw)); }
+.btn-play { left: calc(130 / 306 * var(--vw)); top: calc(395 / 306 * var(--vw)); width: calc(44 / 306 * var(--vw)); height: calc(31 / 306 * var(--vw)); }
+.btn-next { left: calc(200 / 306 * var(--vw)); top: calc(395 / 306 * var(--vw)); width: calc(44 / 306 * var(--vw)); height: calc(31 / 306 * var(--vw)); }
+
+/* Shuffle / repeat */
+.btn-playmode {
+  left:   calc(29 / 306 * var(--vw));
+  top:    calc(402 / 306 * var(--vw));
+  width:  calc(25 / 306 * var(--vw));
+  height: calc(20 / 306 * var(--vw));
+  z-index: 150;
+  cursor: pointer;
+}
+
+/* ── Record player ── */
+.record-player {
+  position: absolute;
+  width: calc(200 / 306 * var(--vw));
+  left: 50%;
+  top:  calc(120 / 306 * var(--vw));
+  transform: translateX(-50%);
+  image-rendering: pixelated;
+  pointer-events: none;
+  user-select: none;
+  z-index: 10;
+}
+
+.frame-overlay { z-index: 15; }
+.layer-ui      { z-index: 20; }
+
+/* ── Record swap animation ── */
+/* Uses large % offsets so it exits the player (overflow:hidden clips it) */
+.record-slide-out { animation: slide-out 0.6s ease-in  forwards; }
+.record-slide-in  { animation: slide-in  0.6s ease-out forwards; }
+
+@keyframes slide-out {
+  0%   { transform: translate(-50%, 0); }
+  100% { transform: translate(calc(-50% - 250%), 20%); }
+}
+@keyframes slide-in {
+  0%   { transform: translate(calc(-50% - 250%), 20%); }
+  100% { transform: translate(-50%, 0); }
+}
+
+/* ── Album frame ── */
+.album-frame-layer {
+  left: calc(-111 / 306 * var(--vw));
+  top:  calc(-23  / 306 * var(--vw));
+  z-index: 45;
+}
+
+/* ── Album art ── */
+.album-mask {
+  position: absolute;
+  left:   calc(36 / 306 * var(--vw));
+  top:    calc(333 / 306 * var(--vw));
+  width:  calc(42 / 306 * var(--vw));
+  height: calc(42 / 306 * var(--vw));
+  clip-path: url(#album-mask);
+  overflow: hidden;
+  z-index: 40;
+  pointer-events: none;
+}
+
+.album-art {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  image-rendering: pixelated;
+}
+
+/* ── Now playing ── */
+.now-playing {
+  position: absolute;
+  left:  calc(85 / 306 * var(--vw));
+  top:   calc(332 / 306 * var(--vw));
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  z-index: 50;
+  pointer-events: none;
+}
+
+.now-playing-label {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(12 / 306 * var(--vw));
+  color: var(--color-secondary);
+}
+
+/* ── Track title (marquee) ── */
+.track-title {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(24 / 306 * var(--vw));
+  color: var(--color-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  max-width: calc(170 / 306 * var(--vw));
+}
+
+.marquee-measure {
+  position: absolute;
+  visibility: hidden;
+  pointer-events: none;
+  white-space: nowrap;
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(24 / 306 * var(--vw));
+}
+
+.marquee-scroll { display: inline-block; animation: marquee 8s linear infinite; }
+.marquee-gap    { margin-left: calc(28 / 306 * var(--vw)); }
+
+@keyframes marquee {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-scroll { animation: none; }
+  .record-slide-out, .record-slide-in { animation: none; }
+}
+
+.track-artist {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(14 / 306 * var(--vw));
+  color: var(--color-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: calc(200 / 306 * var(--vw));
+}
+
+/* ── Time display ── */
+.time-display {
+  position: absolute;
+  left:  calc(26 / 306 * var(--vw));
+  top:   calc(456 / 306 * var(--vw));
+  width: calc(246 / 306 * var(--vw));
+  display: flex;
+  justify-content: space-between;
+  z-index: 50;
+  pointer-events: none;
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(12 / 306 * var(--vw));
+  color: var(--color-primary);
+}
+
+/* ── Progress bar seek target ── */
+.progress-seek {
+  position: absolute;
+  left:   calc(30  / 306 * var(--vw));
+  top:    calc(446 / 306 * var(--vw));
+  width:  calc(241 / 306 * var(--vw));
+  height: calc(6   / 306 * var(--vw));
+  z-index: 150;
+  cursor: pointer;
+}
+
+/* ── Volume hover zone ── */
+.volume-hover-zone {
+  position: absolute;
+  left:   calc(253 / 306 * var(--vw));
+  bottom: calc(77  / 306 * var(--vw));
+  width:  calc(20  / 306 * var(--vw));
+  height: calc(18  / 306 * var(--vw));
+  z-index: 155;
+}
+
+.btn-volume-icon {
+  position: absolute;
+  left: 0; bottom: 0;
+  width:  calc(20 / 306 * var(--vw));
+  height: calc(20 / 306 * var(--vw));
+  cursor: pointer;
+}
+
+.volume-hover-zone.expanded {
+  height: calc(107 / 306 * var(--vw));
+}
+
+.volume-bar-area {
+  position: absolute;
+  left:   calc(5  / 306 * var(--vw));
+  top:    calc(5  / 306 * var(--vw));
+  width:  calc(10 / 306 * var(--vw));
+  height: calc(82 / 306 * var(--vw));
+  cursor: pointer;
+}
+
+.layer.volume-bar-layer { z-index: 150; }
+
+/* ── Settings panel ── */
+.settings-panel {
+  position: absolute;
+  top:   calc(50  / 306 * var(--vw));
+  right: calc(5   / 306 * var(--vw));
+  z-index: 300;
+  pointer-events: auto;
+}
+
+.settings-panel-inner {
+  background: var(--color-primary);
+  border: calc(2 / 306 * var(--vw)) solid var(--color-secondary);
+  border-radius: calc(4 / 306 * var(--vw));
+  padding: calc(6 / 306 * var(--vw));
+  width: calc(140 / 306 * var(--vw));
+  max-height: calc(280 / 306 * var(--vw));
+  overflow-y: auto;
+  scrollbar-width: none;
+  display: flex;
+  flex-direction: column;
+  gap: calc(4 / 306 * var(--vw));
+}
+
+.settings-panel-inner::-webkit-scrollbar { display: none; }
+
+.settings-label {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(11 / 306 * var(--vw));
+  color: var(--color-panel-text);
+  white-space: nowrap;
+}
+
+.settings-theme-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: calc(4 / 306 * var(--vw));
+}
+
+.settings-theme-btn {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(10 / 306 * var(--vw));
+  background: none;
+  border: calc(1 / 306 * var(--vw)) solid var(--color-panel-text);
+  border-radius: calc(2 / 306 * var(--vw));
+  color: var(--color-panel-text);
+  padding: calc(3 / 306 * var(--vw)) calc(6 / 306 * var(--vw));
+  cursor: pointer;
+}
+
+.settings-theme-btn.active,
+.settings-theme-btn:hover {
+  background: var(--color-panel-text);
+  color: var(--color-primary);
+}
+
+/* ── Playlist in settings ── */
+.settings-playlist-list {
+  max-height: calc(120 / 306 * var(--vw));
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: calc(2 / 306 * var(--vw));
+  scrollbar-width: none;
+}
+
+.settings-playlist-list::-webkit-scrollbar { display: none; }
+
+.settings-playlist-item {
+  width: 100%;
+  height: calc(22 / 306 * var(--vw));
+  flex-shrink: 0;
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(11 / 306 * var(--vw));
+  line-height: 1;
+  background: rgba(255,255,255,0.05);
+  border: none;
+  border-radius: calc(2 / 306 * var(--vw));
+  color: var(--color-panel-text);
+  padding: 0 calc(6 / 306 * var(--vw));
+  cursor: pointer;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.settings-playlist-item:hover    { background: rgba(255,255,255,0.15); }
+.settings-playlist-item.active   { background: var(--color-panel-text); color: var(--color-primary); }
+.settings-playlist-item.disabled { opacity: 0.5; cursor: default; }
+
+.settings-error {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(9 / 306 * var(--vw));
+  color: #ff6b6b;
+}
+
+.settings-input {
+  font-family: 'Rainyhearts', monospace;
+  font-size: calc(10 / 306 * var(--vw));
+  background: rgba(0,0,0,0.3);
+  border: calc(1 / 306 * var(--vw)) solid var(--color-panel-text);
+  border-radius: calc(2 / 306 * var(--vw));
+  color: var(--color-panel-text);
+  padding: calc(3 / 306 * var(--vw)) calc(4 / 306 * var(--vw));
+  outline: none;
+  width: 100%;
+}
+
+.settings-input::placeholder { color: var(--color-secondary); }

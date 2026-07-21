@@ -1,0 +1,15 @@
+/* ── Pink theme (default) ── */
+.player {
+  --color-title:      #78364F;
+  --color-primary:    #5a3a4a;
+  --color-secondary:  #8a6a7a;
+  --color-panel-text: #F6CFC8;
+}
+
+/* ── Blue theme ── */
+.player.theme-blue {
+  --color-title:      #063940;
+  --color-primary:    #063940;
+  --color-secondary:  #1a6b6b;
+  --color-panel-text: #C8D3F6;
+}
